@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}分类管理{% endblock %}
+{% block content %}
+<section class="card stack">
+  <h2>分类管理</h2>
+  <form method="post" class="form-grid">
+    <div class="form-group">
+      <label for="category-name">分类名</label>
+      <input id="category-name" name="name" required placeholder="输入分类名称">
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">新增</button>
+    </div>
+  </form>
+  <ul class="list">
+    {% for r in rows %}
+      <li>
+        <span>{{ r.name }}</span>
+        <span class="hint">ID {{ r.category_id }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

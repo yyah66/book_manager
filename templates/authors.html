@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}作者管理{% endblock %}
+{% block content %}
+<section class="card stack">
+  <h2>作者管理</h2>
+  <form method="post" class="form-grid">
+    <div class="form-group">
+      <label for="author-name">作者名</label>
+      <input id="author-name" name="name" required placeholder="输入作者名">
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">新增</button>
+    </div>
+  </form>
+  <ul class="list">
+    {% for r in rows %}
+      <li>
+        <span>{{ r.name }}</span>
+        <span class="hint">ID {{ r.author_id }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

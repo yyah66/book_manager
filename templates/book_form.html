@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}{{ '新增图书' if mode == 'new' else '编辑图书' }}{% endblock %}
+{% block content %}
+<section class="card stack">
+  <h2>{{ '新增图书' if mode == 'new' else '编辑图书' }}</h2>
+  <form method="post" class="form-grid">
+    <div class="form-group">
+      <label for="title">标题</label>
+      <input id="title" name="title" value="{{ book.title if book else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label for="author_name">作者</label>
+      <input id="author_name"
+             name="author_name"
+             list="author-options"
+             placeholder="输入或选择作者"
+             value="{{ book.author_name if book and book.author_name else '' }}">
+      <datalist id="author-options">
+        {% for a in authors %}
+          <option value="{{ a.name }}">
+        {% endfor %}
+      </datalist>
+    </div>
+    <div class="form-group">
+      <label for="category_id">分类</label>
+      <select id="category_id" name="category_id">
+        <option value="">未分类</option>
+        {% for c in categories %}
+          <option value="{{ c.category_id }}" {% if book and c.category_id == book.category_id %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="isbn">ISBN</label>
+      <input id="isbn" name="isbn" value="{{ book.isbn if book and book.isbn else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="stock">库存</label>
+      <input id="stock" name="stock" type="number" min="0" value="{{ book.stock if book else 0 }}">
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">保存</button>
+      <a href="{{ url_for('index') }}" class="btn btn-ghost">返回</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

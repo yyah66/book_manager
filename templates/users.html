@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}用户{% endblock %}
+{% block content %}
+<section class="card stack">
+  <h2>用户管理</h2>
+  <form method="post" class="form-grid">
+    <div class="form-group">
+      <label for="user-username">用户名</label>
+      <input id="user-username" name="username" required placeholder="输入用户名">
+    </div>
+    <div class="form-group">
+      <label for="user-email">邮箱</label>
+      <input id="user-email" name="email" type="email" required placeholder="name@example.com">
+    </div>
+    <div class="form-group">
+      <label for="user-role">角色</label>
+      <select id="user-role" name="role_id">
+        {% for role in roles %}
+          <option value="{{ role.role_id }}" {% if role.name == 'user' %}selected{% endif %}>{{ role.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">新增用户</button>
+    </div>
+  </form>
+</section>
+
+<section class="card stack">
+  <h3>全部用户</h3>
+  <div class="table-wrapper">
+    <table class="table">
+      <thead>
+        <tr><th>ID</th><th>用户名</th><th>邮箱</th><th>角色</th></tr>
+      </thead>
+      <tbody>
+        {% for u in rows %}
+          <tr>
+            <td>{{ u.user_id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.role_name or '-' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

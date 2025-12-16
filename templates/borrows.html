@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}借阅记录{% endblock %}
+{% block content %}
+<section class="card stack">
+  <h2>借阅记录</h2>
+  <div class="table-wrapper">
+    <table class="table">
+      <thead>
+        <tr><th>ID</th><th>用户</th><th>图书</th><th>借出</th><th>到期</th><th>归还</th><th>操作</th></tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td>{{ r.borrow_id }}</td>
+            <td>{{ r.username }}</td>
+            <td>{{ r.title }}</td>
+            <td>{{ r.borrowed_at }}</td>
+            <td>{{ r.due_at }}</td>
+            <td>{{ r.returned_at or '-' }}</td>
+            <td>
+              {% if not r.returned_at %}
+                <div class="table-actions">
+                  <a href="{{ url_for('return_book', borrow_id=r.borrow_id) }}" class="btn btn-primary">归还</a>
+                </div>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
