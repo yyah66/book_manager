@@ -25,27 +25,56 @@ def get_conn():
 @app.route("/")
 def index():
     q = request.args.get("q", "").strip()
-    sql = """
-        SELECT b.book_id,
-               b.title,
-               a.name AS author,
-               c.name AS category,
-               b.isbn,
-               b.stock
+    page_raw = request.args.get("page", "1").strip() or "1"
+    try:
+        page = int(page_raw)
+    except ValueError:
+        page = 1
+    if page < 1:
+        page = 1
+    per_page = 5
+    base_sql = """
         FROM book b
         LEFT JOIN author a ON b.author_id = a.author_id
         LEFT JOIN category c ON b.category_id = c.category_id
     """
+    where_clause = ""
     params = []
     if q:
-        sql += " WHERE (b.title ILIKE %s OR a.name ILIKE %s OR c.name ILIKE %s)"
+        where_clause = " WHERE (b.title ILIKE %s OR a.name ILIKE %s OR c.name ILIKE %s)"
         like = f"%{q}%"
         params = [like, like, like]
-    sql += " ORDER BY b.book_id DESC"
     with get_conn() as conn, conn.cursor() as cur:
-        cur.execute(sql, params)
+        count_sql = "SELECT COUNT(*) AS total " + base_sql + where_clause
+        cur.execute(count_sql, params)
+        total = cur.fetchone()["total"]
+        pages = max((total + per_page - 1) // per_page, 1)
+        if page > pages:
+            page = pages
+        offset = (page - 1) * per_page
+        select_sql = """
+            SELECT b.book_id,
+                   b.title,
+                   a.name AS author,
+                   c.name AS category,
+                   b.isbn,
+                   b.stock
+        """ + base_sql + where_clause + " ORDER BY b.book_id DESC LIMIT %s OFFSET %s"
+        cur.execute(select_sql, params + [per_page, offset])
         rows = cur.fetchall()
-    return render_template("index.html", rows=rows, q=q)
+    has_prev = page > 1
+    has_next = page < pages or (page == pages and total > page * per_page)
+    return render_template(
+        "index.html",
+        rows=rows,
+        q=q,
+        page=page,
+        pages=pages,
+        per_page=per_page,
+        total=total,
+        has_prev=has_prev,
+        has_next=has_next,
+    )
 
 
 @app.route("/book/<int:book_id>")
@@ -274,7 +303,28 @@ def categories():
 
 @app.route("/borrows")
 def borrows():
+    page_raw = request.args.get("page", "1").strip() or "1"
+    try:
+        page = int(page_raw)
+    except ValueError:
+        page = 1
+    if page < 1:
+        page = 1
+    per_page = 5
     with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT COUNT(*) AS total
+            FROM borrow bo
+            JOIN "user" u ON bo.user_id = u.user_id
+            JOIN book b ON bo.book_id = b.book_id
+            """
+        )
+        total = cur.fetchone()["total"]
+        pages = max((total + per_page - 1) // per_page, 1)
+        if page > pages:
+            page = pages
+        offset = (page - 1) * per_page
         cur.execute(
             """
             SELECT bo.borrow_id,
@@ -287,10 +337,23 @@ def borrows():
             JOIN "user" u ON bo.user_id = u.user_id
             JOIN book b ON bo.book_id = b.book_id
             ORDER BY bo.borrow_id DESC
-            """
+            LIMIT %s OFFSET %s
+            """,
+            (per_page, offset),
         )
         rows = cur.fetchall()
-    return render_template("borrows.html", rows=rows)
+    has_prev = page > 1
+    has_next = page < pages or (page == pages and total > page * per_page)
+    return render_template(
+        "borrows.html",
+        rows=rows,
+        page=page,
+        pages=pages,
+        total=total,
+        per_page=per_page,
+        has_prev=has_prev,
+        has_next=has_next,
+    )
 
 
 @app.route("/book/<int:book_id>/borrow", methods=["POST"])

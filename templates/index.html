@@ -37,5 +37,23 @@
       </tbody>
     </table>
   </div>
+  <div class="table-footer">
+    <span>共 {{ total }} 条记录</span>
+    {% if pages > 1 %}
+    <nav class="pagination">
+      {% if has_prev %}
+        <a href="{{ url_for('index', page=page-1, q=q or None) }}" class="btn btn-ghost">上一页</a>
+      {% else %}
+        <span class="btn btn-ghost disabled">上一页</span>
+      {% endif %}
+      <span>第 {{ page }} / {{ pages }} 页</span>
+      {% if has_next %}
+        <a href="{{ url_for('index', page=page+1, q=q or None) }}" class="btn btn-ghost">下一页</a>
+      {% else %}
+        <span class="btn btn-ghost disabled">下一页</span>
+      {% endif %}
+    </nav>
+    {% endif %}
+  </div>
 </section>
 {% endblock %}
